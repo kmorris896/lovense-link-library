@@ -1,0 +1,15 @@
+{
+  "name": "lovense-link-libary",
+  "version": "1.0.0",
+  "description": "Lovense Link Library provides an object-oriented method to interact with Lovense control links.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "kmorris896",
+  "license": "SEE LICENSE IN LICENSE",
+  "repository": "github.com:kmorris896/lovense-link-library",
+  "dependencies": {
+    "node-fetch": "^2.6.1"
+  }
+}
