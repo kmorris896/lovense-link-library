@@ -4,7 +4,7 @@
   "description": "Lovense Link Library provides an object-oriented method to interact with Lovense control links.",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "node test.js"
   },
   "author": "kmorris896",
   "license": "SEE LICENSE IN LICENSE",
