@@ -11,17 +11,30 @@ function LovenseLink(url_in) {
     this.url = linkMatch[0];
     this.shortURL = linkMatch[1];
     
-    const res = fetch("https://" + controlLinkDomain + "/c/" + this.shortURL)
+    fetch("https://" + controlLinkDomain + "/c/" + this.shortURL)
       .then(function (res) {
         console.log("http status: " + res.status);
-        console.log(JSON.stringify(res, null, 2));
         if (res.status == "200") {  
           console.log("Location: " + res.url);
           var re = /(\w+$)/.test(res.url);
           this.sid = RegExp.$1
-          console.log(this.sid);
+          console.log("SID Defined: " + this.sid);
         }
-      });
+      })
+      .then(function () {
+        fetch("https://api.lovense.com/developer/v2/loading/" + this.sid)
+          .then(function(res) { 
+            res.json().then(function(json) {
+              console.log(json);
+              if (json.result === true) {
+                this.toyType = json.data;
+                this.validLink = true;
+              } else {
+                this.validLink = false;
+              }
+            });
+          }); 
+        });
   } else {
     console.log("No Lovense Link detected.");
     this.url = null;

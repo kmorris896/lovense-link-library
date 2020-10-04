@@ -6,4 +6,4 @@ const Lovense = require('./index.js');
 
 console.log("TEST 1: Regexp Parsing");
 const lovenseLink = new Lovense("https://c.lovense.com/c/vier7z");
-console.log(lovenseLink.sid);
+
