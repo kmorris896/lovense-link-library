@@ -62,4 +62,7 @@ async function testLovense() {
 testLovense()
   .then(function (results) {
     console.log(results);
+    if (results.statusCode !== 200) {
+      process.exit(1);
+    }
   });
