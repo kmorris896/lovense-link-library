@@ -20,6 +20,10 @@ class LovenseLink {
     }
   }
 
+  async heartbeat() {
+    const res = await fetch("https://" + controlLinkDomain + "/app/ws/loading/" + this.sid + "?_=" + unixtime);
+  }
+
   async getSID() {
     const res = await fetch("https://" + controlLinkDomain + "/c/" + this.shortURL);
     console.log("http status: " + res.status);
