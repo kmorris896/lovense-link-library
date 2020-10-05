@@ -41,6 +41,22 @@ async function testLovense() {
   }
 
   // Test 2: make sure the toy matches
+  if (lovenseLink.toyData.toyType === "lush") {
+    console.log("toyType (" + lovenseLink.toyData.toyType + ") match: passed");
+  } else {
+    const errorMsg = "json.toyData.toyType (" + json.toyData.toyType + ") and Link SID (lush) match: FAILED";
+    response.body = errorMsg;
+    response.statusCode = 402;
+
+    return response;
+  }
+
+
+  // If all tests pass:
+  response.body = "OK-READY";
+  response.statusCode = 200;
+
+  return response;
 }
 
 testLovense()
