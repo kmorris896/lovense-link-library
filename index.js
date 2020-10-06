@@ -20,8 +20,10 @@ class LovenseLink {
     }
   }
 
-  async heartbeat() {
-    const res = await fetch("https://" + controlLinkDomain + "/app/ws/loading/" + this.sid + "?_=" + unixtime);
+  async initialize() {
+    await this.getSID();
+    await this.getToyInfo();
+    await this.heartbeat();
   }
 
   async getSID() {
@@ -48,9 +50,13 @@ class LovenseLink {
     this.ready = true;
   }
 
-  async initialize() {
-    await this.getSID();
-    await this.getToyInfo();
+  async heartbeat() {
+    const offset = new Date().getTimezoneOffset() * 60;  // Return offset to seconds
+    const unixtime = Date.now() + offset;
+    const res = await fetch("https://" + controlLinkDomain + "/app/ws/loading/" + this.sid + "?_=" + unixtime);
+
+    const json = await res.json();
+    console.log("heartbeat: " + JSON.stringify(json));
   }
 };
 
