@@ -61,10 +61,15 @@ async function testLovense() {
   return response;
 }
 
-testLovense()
-  .then(function (results) {
-    console.log(results);
-    if (results.statusCode !== 200) {
-      process.exit(result.statusCode);
-    }
-  });
+if (typeof lovenseAPIToken !== "undefined") {
+  testLovense()
+    .then(function (results) {
+      console.log(results);
+      if (results.statusCode !== 200) {
+        process.exit(result.statusCode);
+      }
+    });
+} else {
+  console.log("lovenseAPIToken is undefined.");
+  process.exit(1);
+} 
