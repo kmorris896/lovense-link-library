@@ -2,10 +2,9 @@ require('dotenv').config();
 const Lovense = require('./index.js');
 const fetch = require('node-fetch');
 
-console.log(process.env);
-
 const lovenseAPIToken = process.env.LOVENSETOKEN;
 const lovenseToyId = process.env.LOVENSETOYID;
+const lovenseLinkShortURL = process.env.SHORTURL
 
 async function testLovense() {
   // Let's first create a test link:

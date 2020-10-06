@@ -7,8 +7,7 @@ const controlLinkRegex = new RegExp("^https?://" + controlLinkDomain + "\/c\/(\\
 class LovenseLink {
   constructor (url_in) {
     console.log("testing: " + url_in);
-    this.ready = false;
-    this.validLink = false;
+    this.status = "invalid";
 
     const linkMatch = controlLinkRegex.exec(url_in);
     if ((linkMatch != null) && (linkMatch.length > 1)) {
@@ -16,7 +15,7 @@ class LovenseLink {
       this.shortURL = linkMatch[1];
     } else {
       this.url = url_in;
-      this.validLink = false;
+      this.status = "invalid";
     }
   }
 
@@ -44,10 +43,15 @@ class LovenseLink {
     // console.log(json);
     if (json.result === true) {
       this.toyData = json.data;
-      this.validLink = true;
-    } 
-    
-    this.ready = true;
+      this.status = json.data.status;
+    } else (json.result === false) {
+      this.status = json.data.status;
+    }
+  }
+
+  async consumeLink() {
+    const res = await fetch("https://" + controlLinkDomain + "/app/ws2/play/" + this.sid);
+    this.status = "controlling";
   }
 
   async heartbeat() {
