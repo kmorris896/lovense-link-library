@@ -78,16 +78,18 @@ if (typeof lovenseAPIToken !== "undefined") {
       if (results.statusCode !== 200) {
         process.exit(result.statusCode);
       }
+      console.log("Finished Self-test of Lovense Link.");
+    })
+    .then(function () {
+      if (typeof lovenseLinkShortURL !== "undefined") {
+        console.log("Got shortURL; running testControl.");
+        testControl(lovenseLinkShortURL)
+          .then(function () {
+            console.log("Done.");
+          });
+      }
     });
 
-  console.log("Finished Self-test of Lovense Link.");
-  if (typeof lovenseLinkShortURL !== "undefined") {
-    console.log("Got shortURL; running testControl.");
-    testControl(lovenseLinkShortURL)
-      .then(function () {
-        console.log("Done.");
-      });
-  }
 } else {
   console.log("lovenseAPIToken is undefined.");
   process.exit(1);
