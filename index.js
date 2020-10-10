@@ -44,7 +44,7 @@ class LovenseLink {
     if (json.result === true) {
       this.toyData = json.data;
       this.status = json.data.status;
-    } else (json.result === false) {
+    } else if (json.result === false) {
       this.status = json.data.status;
     }
   }
