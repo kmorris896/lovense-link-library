@@ -63,9 +63,11 @@ async function testLovenseInitialization() {
 async function testControl(shortURL) {
   const lovenseLink = new Lovense("https://c.lovense.com/c/" + shortURL);
   await lovenseLink.initialize();
-  await lovenseLink.consumeLink();
 
-  await lovenseLink.heartbeat();
+  if (lovenseLink.status === "queued") {
+    await lovenseLink.consumeLink();
+    await lovenseLink.heartbeat()
+  }
 }
 
 // --- MAIN --- //
@@ -78,9 +80,10 @@ if (typeof lovenseAPIToken !== "undefined") {
       }
     });
 
-  if (typeof shortURL !== "undefined") {
+  if (typeof lovenseLinkShortURL !== "undefined") {
+    console.log("Got shortURL; running testControl.");
     testControl(lovenseLinkShortURL)
-      .then(function (results) {
+      .then(function () {
         console.log("Done.");
       });
   }
