@@ -64,6 +64,7 @@ async function testControl(shortURL) {
   const lovenseLink = new Lovense("https://c.lovense.com/c/" + shortURL);
   await lovenseLink.initialize();
 
+  console.log("testControl: lovenseLink.status = " + lovenseLink.status);
   if (lovenseLink.status === "queued") {
     await lovenseLink.consumeLink();
     await lovenseLink.heartbeat()
