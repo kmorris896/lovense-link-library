@@ -80,6 +80,7 @@ if (typeof lovenseAPIToken !== "undefined") {
       }
     });
 
+  console.log("Finished Self-test of Lovense Link.");
   if (typeof lovenseLinkShortURL !== "undefined") {
     console.log("Got shortURL; running testControl.");
     testControl(lovenseLinkShortURL)
