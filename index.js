@@ -22,7 +22,6 @@ class LovenseLink {
   async initialize() {
     await this.getSID();
     await this.getToyInfo();
-    await this.heartbeat();
   }
 
   async getSID() {
@@ -38,6 +37,7 @@ class LovenseLink {
   };
 
   async getToyInfo() {
+    // check to make sure that this is a valid link first and that sid is set.
     const res = await fetch("https://api.lovense.com/developer/v2/loading/" + this.sid);
     const json = await res.json();
     // console.log(json);
@@ -52,6 +52,8 @@ class LovenseLink {
   async consumeLink() {
     const res = await fetch("https://" + controlLinkDomain + "/app/ws2/play/" + this.sid);
     this.status = "controlling";
+
+    return this.status;
   }
 
   async heartbeat() {

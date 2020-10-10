@@ -6,7 +6,7 @@ const lovenseAPIToken = process.env.LOVENSETOKEN;
 const lovenseToyId = process.env.LOVENSETOYID;
 const lovenseLinkShortURL = process.env.SHORTURL
 
-async function testLovense() {
+async function testLovenseInitialization() {
   // Let's first create a test link:
   const url = 'https://api.lovense.com/developer/v2/createSession?token=' + lovenseAPIToken 
     + '&customerid=lovenseLinkLibrary&toyId=' + lovenseToyId + '&toyType=lush';
@@ -28,7 +28,7 @@ async function testLovense() {
   console.log("shortURL: " + lovenseLink.shortURL);
 
   // initialize all of the other properties
-  const foo = await lovenseLink.initialize();
+  await lovenseLink.initialize();
 
   // Test 1: make sure the sid from the link matches the sid from the API call
   if (lovenseLink.sid === json.data.sid) {
@@ -60,15 +60,31 @@ async function testLovense() {
   return response;
 }
 
+async function testControl(shortURL) {
+  const lovenseLink = new Lovense("https://c.lovense.com/c/" + shortURL);
+  await lovenseLink.initialize();
+  await lovenseLink.consumeLink();
+
+  await lovenseLink.heartbeat();
+}
+
+// --- MAIN --- //
 if (typeof lovenseAPIToken !== "undefined") {
-  testLovense()
+  testLovenseInitialization()
     .then(function (results) {
       console.log(results);
       if (results.statusCode !== 200) {
         process.exit(result.statusCode);
       }
     });
+
+  if (typeof shortURL !== "undefined") {
+    testControl(lovenseLinkShortURL)
+      .then(function (results) {
+        console.log("Done.");
+      });
+  }
 } else {
   console.log("lovenseAPIToken is undefined.");
   process.exit(1);
-} 
+}

@@ -30,3 +30,4 @@ jobs:
       env:
         LOVENSETOKEN: ${{ secrets.LOVENSETOKEN }}
         LOVENSETOYID: ${{ secrets.LOVENSETOYID }}   
+        SHORTURL: ${{ secrets.SHORTURL }}
