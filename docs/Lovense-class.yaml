@@ -1,0 +1,19 @@
+LovenseLink:
+    - url: string
+      - Contains all of regexp clean version of the provided link
+    - shortURL: string
+      - Contains the last characters after the last slash (currently 6 characters)
+    - status: string
+      - "invalid": The URL Provided is not valid or has already been consumed
+      - "queue": The URL is valid and has not been clicked.  `toyData` will contain the link information
+      - "controlling": The link is being controlled, either by someone else or by the bot.  If `toyData` exists, then the bot is controlling.
+    - toyData: object provided by `/loading/:sessionid`
+      - customerParam: Not sure what this is.  Usually `null`
+      - toyType": string, Comma delimited list of toys.
+      - customerid: string, provided when link is generated.
+      - leftTime: number, Time, in seconds, that was programmed into the link,
+      - allow2way: boolean, Whether two-way is allowed.  Usually set to `false`
+      - customers: string, Not sure what this is.  Usually `""`
+      - sid: string, the Session ID
+      - status: string, status of the link.  "queue" when open, "controlling" when being controlled, "unauthorized" when timer is expired or the link is closed.
+      - toyId: string, Comma delimited list of ToyIDs

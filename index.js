@@ -38,25 +38,31 @@ class LovenseLink {
 
   async getToyInfo() {
     // check to make sure that this is a valid link first and that sid is set.
-    const res = await fetch("https://api.lovense.com/developer/v2/loading/" + this.sid);
-    const json = await res.json();
-    // console.log(json);
-    if (json.result === true) {
-      this.toyData = json.data;
-      this.status = json.data.status;
-    } else if (json.result === false) {
-      this.status = json.data.status;
+    if (this.hasOwnProperty("sid") && (typeof this.sid === "string")) {
+      const res = await fetch("https://api.lovense.com/developer/v2/loading/" + this.sid);
+      const json = await res.json();
+
+      // console.log("getToyInfo[" + this.shortURL + "]: " + JSON.stringify(json));
+      if (json.result === true) {
+        this.toyData = json.data;
+        this.status = json.data.status;
+      } else if (json.result === false) {
+        this.status = json.data.status;
+      }
+    } else {
+      this.status = "invalid";
     }
   }
 
   async consumeLink() {
-    const res = await fetch("https://" + controlLinkDomain + "/app/ws2/play/" + this.sid);
-    this.status = "controlling";
-
-    return this.status;
+    if (this.status === "queue") {
+      const res = await fetch("https://" + controlLinkDomain + "/app/ws2/play/" + this.sid);
+      this.status = "controlling";
+    }
   }
 
   async heartbeat() {
+
     const offset = new Date().getTimezoneOffset() * 60;  // Return offset to seconds
     const unixtime = Date.now() + offset;
     const res = await fetch("https://" + controlLinkDomain + "/app/ws/loading/" + this.sid + "?_=" + unixtime);

@@ -7,6 +7,7 @@ const lovenseToyId = process.env.LOVENSETOYID;
 const lovenseLinkShortURL = process.env.SHORTURL
 
 async function testLovenseInitialization() {
+  return true;
   // Let's first create a test link:
   const url = 'https://api.lovense.com/developer/v2/createSession?token=' + lovenseAPIToken 
     + '&customerid=lovenseLinkLibrary&toyId=' + lovenseToyId + '&toyType=lush';
@@ -20,36 +21,56 @@ async function testLovenseInitialization() {
     response.statusCode = 400;
     response.body = "Unable to generate custom link: " + json.message;
 
-    return response;
+    terminateTest(response);
   }
 
+  return json;
+}
+
+async function testLink(shortURL, testResponseObject = {}) {
+  var response = {};
+
   // Create lovenseLink Class and let's test this baby
-  const lovenseLink = new Lovense(json.data.controlLink);
+  const lovenseLink = new Lovense(shortURL);
   console.log("shortURL: " + lovenseLink.shortURL);
 
   // initialize all of the other properties
   await lovenseLink.initialize();
 
-  // Test 1: make sure the sid from the link matches the sid from the API call
-  if (lovenseLink.sid === json.data.sid) {
-    console.log("SID (" + lovenseLink.sid + ") match: passed");
-  } else {
-    const errorMsg = "json.data.sid (" + json.data.sid + ") and Link SID (" + lovenseLink.sid + ") match: FAILED";
-    response.body = errorMsg;
+  // if the lovenseLink isn't queued then the test fails anyway
+  if (lovenseLink.status !== "queue") {
     response.statusCode = 401;
+    response.body = "lovenseLink " + lovenseLink.shortURL + " was not queued and therefore will not pass further tests.";
 
     return response;
+  } else {
+    // If we're testing against a known testResponseObject, then let's test everything
+    if (testResponseObject.hasOwnProperty("data") && testResponseObject.data.hasOwnProperty("sid")) {
+      if (lovenseLink.sid === testResponseObject.sid) {
+        console.log("SID (" + lovenseLink.sid + ") match: passed");
+      } else {
+        response.statusCode = 402;
+        response.body = "testResponseObject.sid (" + testResponseObject.sid + ") and Link SID (" + lovenseLink.sid + ") match: FAILED";
+
+        return response;
+      }
+    }
   }
 
-  // Test 2: make sure the toy matches
-  if (lovenseLink.toyData.toyType === "lush") {
-    console.log("toyType (" + lovenseLink.toyData.toyType + ") match: passed");
+  // test toyType
+  if (testResponseObject.hasOwnProperty("data")) {
+    // Test 2: make sure the toy matches
+    // Tests will always be toyType lush
+    if (lovenseLink.toyData.toyType === "lush") {
+      console.log("toyType (" + lovenseLink.toyData.toyType + ") match: passed");
+    } else {
+      response.statusCode = 403;
+      response.body = "Link toyType " + lovenseLink.toyData.toyType + " === lush match: FAILED";
+  
+      return response;
+    }
   } else {
-    const errorMsg = "json.toyData.toyType (" + json.toyData.toyType + ") and Link SID (lush) match: FAILED";
-    response.body = errorMsg;
-    response.statusCode = 402;
-
-    return response;
+    console.log("INFO ONLY: toyType (" + lovenseLink.toyData.toyType + ")");
   }
 
 
@@ -61,7 +82,7 @@ async function testLovenseInitialization() {
 }
 
 async function testControl(shortURL) {
-  const lovenseLink = new Lovense("https://c.lovense.com/c/" + shortURL);
+  const lovenseLink = new Lovense(shortURL);
   await lovenseLink.initialize();
 
   console.log("testControl: lovenseLink.status = " + lovenseLink.status);
@@ -71,23 +92,28 @@ async function testControl(shortURL) {
   }
 }
 
+function terminateTest(response_object) {
+  console.log("terminateTest: " + response_object);
+  if (results.statusCode !== 200) {
+    process.exit(result.statusCode);
+  } else {
+    process.exit();
+  }
+}
+
 // --- MAIN --- //
 if (typeof lovenseAPIToken !== "undefined") {
   testLovenseInitialization()
-    .then(function (results) {
-      console.log(results);
-      if (results.statusCode !== 200) {
-        process.exit(result.statusCode);
-      }
-      console.log("Finished Self-test of Lovense Link.");
+    .then(async function (results) {
+      // await testLink(results.data.controlLink, results);
     })
-    .then(function () {
+    .then(async function () {
       if (typeof lovenseLinkShortURL !== "undefined") {
         console.log("Got shortURL; running testControl.");
-        testControl(lovenseLinkShortURL)
-          .then(function () {
-            console.log("Done.");
-          });
+        await testLink(lovenseLinkShortURL);
+        await testControl(lovenseLinkShortURL);
+
+        console.log("Done.");
       }
     });
 
