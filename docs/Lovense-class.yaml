@@ -17,3 +17,7 @@ LovenseLink:
       - sid: string, the Session ID
       - status: string, status of the link.  "queue" when open, "controlling" when being controlled, "unauthorized" when timer is expired or the link is closed.
       - toyId: string, Comma delimited list of ToyIDs
+    - heartbeatInterval: number
+      - ID value of the timer that is set; used to clearInterval once the link is dead
+    - heartbeatUnixTime: number
+      - UnixTime of the last time the heartbeat was sent

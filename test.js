@@ -88,7 +88,7 @@ async function testControl(shortURL) {
   console.log("testControl: lovenseLink.status = " + lovenseLink.status);
   if (lovenseLink.status === "queue") {
     await lovenseLink.consumeLink();
-    await lovenseLink.heartbeat()
+    await lovenseLink.beginLinkMonitor()
   }
 }
 

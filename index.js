@@ -62,13 +62,37 @@ class LovenseLink {
   }
 
   async heartbeat() {
+    var unixtime = 0;
 
-    const offset = new Date().getTimezoneOffset() * 60;  // Return offset to seconds
-    const unixtime = Date.now() + offset;
-    const res = await fetch("https://" + controlLinkDomain + "/app/ws/loading/" + this.sid + "?_=" + unixtime);
+    if (typeof this.heartbeatUnixTime === "undefined") {
+      const offset = new Date().getTimezoneOffset() * 60;  // Return offset to seconds
+      this.heartbeatUnixTime = Date.now() + offset;
+    } else {
+      this.heartbeatUnixTime++;
+    }
+
+    const res = await fetch("https://" + controlLinkDomain + "/app/ws/loading/" + this.sid + "?_=" + this.heartbeatUnixTime);
 
     const json = await res.json();
     console.log("heartbeat: " + JSON.stringify(json));
+
+    return json;
+  }
+
+  async linkMonitor() {
+    const heartbeatData = async this.heartbeat();
+
+    if (heartbeatData.data.status === "unauthorized") {
+      clearInterval(this.heartbeatInterval);
+      this.heartbeatInterval = null;
+    }
+
+    this.status = heartbeatData.data.status;
+    return this.status;
+  }
+
+  async beginLinkMonitor() {
+    this.heartbeatInterval = setInterval(this.linkMonitor, 1000);
   }
 };
 
