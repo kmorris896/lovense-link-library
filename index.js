@@ -6,13 +6,14 @@ const controlLinkRegex = new RegExp("^https?://" + controlLinkDomain + "\/c\/(\\
 
 class LovenseLink {
   constructor (url_in) {
-    console.log("testing: " + url_in);
+    console.log("Constructing LovenseLink Class with this URL: " + url_in);
     this.status = "invalid";
 
     const linkMatch = controlLinkRegex.exec(url_in);
     if ((linkMatch != null) && (linkMatch.length > 1)) {
       this.url = linkMatch[0];
       this.shortURL = linkMatch[1];
+      this.status = "matched";
     } else {
       this.url = url_in;
       this.status = "invalid";
@@ -80,7 +81,7 @@ class LovenseLink {
   }
 
   async linkMonitor() {
-    const heartbeatData = async this.heartbeat();
+    const heartbeatData = await this.heartbeat();
 
     if (heartbeatData.data.status === "unauthorized") {
       clearInterval(this.heartbeatInterval);

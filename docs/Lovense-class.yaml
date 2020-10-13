@@ -4,9 +4,11 @@ LovenseLink:
     - shortURL: string
       - Contains the last characters after the last slash (currently 6 characters)
     - status: string
+      - "matched": The URL matches the Lovense control link RegExp but has not yet been consumed or parsed
       - "invalid": The URL Provided is not valid or has already been consumed
       - "queue": The URL is valid and has not been clicked.  `toyData` will contain the link information
       - "controlling": The link is being controlled, either by someone else or by the bot.  If `toyData` exists, then the bot is controlling.
+      - "unauthorized": The link has expired or session was ended
     - toyData: object provided by `/loading/:sessionid`
       - customerParam: Not sure what this is.  Usually `null`
       - toyType": string, Comma delimited list of toys.
