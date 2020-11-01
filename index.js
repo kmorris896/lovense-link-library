@@ -4,6 +4,27 @@ const fetch = require('node-fetch');
 const controlLinkDomain = 'c.lovense.com';
 const controlLinkRegex = new RegExp("^https?://" + controlLinkDomain + "\/c\/(\\w+)", 'i');
 
+const toyMaxMin = {
+  "v": {
+    "description": "vibration level",
+    "min": 0,
+    "max": 20,
+    "toys": ["ambi", "domi", "edge", "hush", "lush", "max", "mission", "nora", "osci"]
+  },
+  "r": {
+    "description": "rotation level",
+    "min": 0,
+    "max": 20,
+    "toys": ["nora"]
+  },
+  "c": {
+    "description": "compression level",
+    "min": 0,
+    "max": 3,
+    "toys": ["max"]
+  }
+}
+
 class LovenseLink {
   constructor (url_in) {
     console.log("Constructing LovenseLink Class with this URL: " + url_in);
@@ -96,6 +117,7 @@ class LovenseLink {
     payload.id = {};
 
     for (const toyId in this.commandQueue) {
+      checkCommandValues(toyId);
       payload.id[toyId] = this.commandQueue[toyId].queue
     }
 
@@ -116,6 +138,31 @@ class LovenseLink {
     return data;
   }
 
+  checkCommandValues(toyId_in) {
+    var toyIndex = 0;
+
+    // if the toyId_in is not at the start of the string, 
+    // it's obviously in the second string
+    if (this.toyData.toyId.indexOf(toyId_in) > 0) {
+      toyIndex = 1;
+    }
+
+    const toyType = this.toyData.toyType.split(',')[toyIndex];
+    
+    // Toy Control Value Check!
+    // Iterate through toyMaxMin's v, r, c objects.  If the toyType is in the toys array, 
+    // then apply the max/min as necessary.  If it doesn't exist, the control doesn't 
+    // apply (i.e. the toy doesn't have the control), so set to -1, which is what the WebUI does.
+    for (control in toyMaxMin) {
+      const controlObject = toyMaxMin[control];
+      if (controlObject.toys.indexOf(toyType) > -1) {
+        if (this.commandQueue[toyId_in].queue[control] > controlObject.max) this.commandQueue[toyId_in].queue[control] = controlObject.max;
+        if (this.commandQueue[toyId_in].queue[control] < controlObject.min) this.commandQueue[toyId_in].queue[control] = controlObject.min;
+      } else {
+        this.commandQueue[toyId_in].queue[control] = -1;
+      }
+    }
+  }
 
   async linkMonitor() {
     const heartbeatData = await this.heartbeat();
