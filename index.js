@@ -17,7 +17,7 @@ const toyMaxMin = {
     "max": 20,
     "toys": ["nora"]
   },
-  "c": {
+  "p": {
     "description": "compression level",
     "min": 0,
     "max": 3,
