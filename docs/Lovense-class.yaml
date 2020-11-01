@@ -11,7 +11,7 @@ LovenseLink:
       - "unauthorized": The link has expired or session was ended
     - toyData: object provided by `/loading/:sessionid`
       - customerParam: Not sure what this is.  Usually `null`
-      - toyType": string, Comma delimited list of toys.
+      - toyType: string, Comma delimited list of toys.
       - customerid: string, provided when link is generated.
       - leftTime: number, Time, in seconds, that was programmed into the link,
       - allow2way: boolean, Whether two-way is allowed.  Usually set to `false`
@@ -23,3 +23,14 @@ LovenseLink:
       - ID value of the timer that is set; used to clearInterval once the link is dead
     - heartbeatUnixTime: number
       - UnixTime of the last time the heartbeat was sent
+    - commandQueue: object of toys and commands, must have at least one toyId object
+      - toyId: string, one ToyId obtained within toyData.toyId
+        - current: object, current toy settings
+          - v: number (NOT string), vibration level 0-20
+          - p: number, compression level 0-3
+          - r: number, rotation level 0-20
+        - queue: object, toy settings to send
+          - v: number (NOT string), vibration level 0-20
+          - p: number, compression level 0-3
+          - r: number, rotation level 0-20
+    

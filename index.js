@@ -47,6 +47,13 @@ class LovenseLink {
       if (json.result === true) {
         this.toyData = json.data;
         this.status = json.data.status;
+
+        for (const toyId in json.data.toyId.split(',')) {
+          this.commandQueue[toyId] = {
+            "current": {"v": 0, "p": 0, "r": 0},
+            "queue": {"v": 0, "p": 0, "r": 0}
+          }
+        }
       } else if (json.result === false) {
         this.status = json.data.status;
       }
@@ -79,6 +86,36 @@ class LovenseLink {
 
     return json;
   }
+
+
+  async sendControlCommand() {
+    var payload = {	"cate": "id",
+                    "id": {}
+                  };
+
+    payload.id = {};
+
+    for (const toyId in this.commandQueue) {
+      payload.id[toyId] = this.commandQueue[toyId].queue
+    }
+
+    const sessionId = document.getElementById('sessionId').value;
+    const url = "https://" + controlLinkDomain + "/app/ws/command/" + sessionId;
+
+    const ret = await fetch(url, {
+        method: 'POST',
+        credentials: 'same-origin',
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded'
+        },
+        body: "order=" + JSON.stringify(payload)});
+
+    const data = await ret.json();
+    console.log(JSON.stringify(data));
+
+    return data;
+  }
+
 
   async linkMonitor() {
     const heartbeatData = await this.heartbeat();
