@@ -1,36 +1,278 @@
-LovenseLink:
-    - url: string
-      - Contains all of regexp clean version of the provided link
-    - shortURL: string
-      - Contains the last characters after the last slash (currently 6 characters)
-    - status: string
-      - "matched": The URL matches the Lovense control link RegExp but has not yet been consumed or parsed
-      - "invalid": The URL Provided is not valid or has already been consumed
-      - "queue": The URL is valid and has not been clicked.  `toyData` will contain the link information
-      - "controlling": The link is being controlled, either by someone else or by the bot.  If `toyData` exists, then the bot is controlling.
-      - "unauthorized": The link has expired or session was ended
-    - toyData: object provided by `/loading/:sessionid`
-      - customerParam: Not sure what this is.  Usually `null`
-      - toyType: string, Comma delimited list of toys.
-      - customerid: string, provided when link is generated.
-      - leftTime: number, Time, in seconds, that was programmed into the link,
-      - allow2way: boolean, Whether two-way is allowed.  Usually set to `false`
-      - customers: string, Not sure what this is.  Usually `""`
-      - sid: string, the Session ID
-      - status: string, status of the link.  "queue" when open, "controlling" when being controlled, "unauthorized" when timer is expired or the link is closed.
-      - toyId: string, Comma delimited list of ToyIDs
-    - heartbeatInterval: number
-      - ID value of the timer that is set; used to clearInterval once the link is dead
-    - heartbeatUnixTime: number
-      - UnixTime of the last time the heartbeat was sent
-    - commandQueue: object of toys and commands, must have at least one toyId object
-      - toyId: string, one ToyId obtained within toyData.toyId
-        - current: object, current toy settings
-          - v: number (NOT string), vibration level 0-20
-          - p: number, compression level 0-3
-          - r: number, rotation level 0-20
-        - queue: object, toy settings to send
-          - v: number (NOT string), vibration level 0-20
-          - p: number, compression level 0-3
-          - r: number, rotation level 0-20
-    
+openapi: 3.0.0
+info:
+  title: Lovense Link Library
+  description: "Lovense Link Library is a node.js based link handler for Lovense toys.\
+    \  This \nLibrary doesn't expose an API *per se* but does function similarly to\
+    \ one, with \nfunctions acting as endpoints.  This documentation is provided to\
+    \ help you understand \nhow the library works and what information is expected.\n"
+  license:
+    name: GNU 3.0 + Commons Clause 1.0
+    url: https://github.com/kmorris896/lovense-link-library/blob/main/LICENSE
+  version: 1.0.0
+servers:
+- url: https://virtserver.swaggerhub.com/rapture/lovense-link-library/1.0.0
+  description: "Lovense Link Library is a node.js based link handler for Lovense toys.\
+    \  This \nLibrary doesn't expose an API *per se* but does function similarly to\
+    \ one, with \nfunctions acting as endpoints.  This documentation is provided to\
+    \ help you understand \nhow the library works and what information is expected.\n"
+tags:
+- name: admins
+  description: Secured Admin-only calls
+- name: developers
+  description: Operations available to regular developers
+paths:
+  /inventory:
+    get:
+      tags:
+      - developers
+      summary: searches inventory
+      description: |
+        By passing in the appropriate options, you can search for
+        available inventory in the system
+      operationId: searchInventory
+      parameters:
+      - name: searchString
+        in: query
+        description: pass an optional search string for looking up inventory
+        required: false
+        style: form
+        explode: true
+        schema:
+          type: string
+      - name: skip
+        in: query
+        description: number of records to skip for pagination
+        required: false
+        style: form
+        explode: true
+        schema:
+          minimum: 0
+          type: integer
+          format: int32
+      - name: limit
+        in: query
+        description: maximum number of records to return
+        required: false
+        style: form
+        explode: true
+        schema:
+          maximum: 50
+          minimum: 0
+          type: integer
+          format: int32
+      responses:
+        "200":
+          description: search results matching criteria
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/InventoryItem'
+        "400":
+          description: bad input parameter
+    post:
+      tags:
+      - admins
+      summary: adds an inventory item
+      description: Adds an item to the system
+      operationId: addInventory
+      requestBody:
+        description: Inventory item to add
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/InventoryItem'
+      responses:
+        "201":
+          description: item created
+        "400":
+          description: invalid input, object invalid
+        "409":
+          description: an existing item already exists
+components:
+  schemas:
+    InventoryItem:
+      required:
+      - id
+      - manufacturer
+      - name
+      - releaseDate
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          example: d290f1ee-6c54-4b01-90e6-d701748f0851
+        name:
+          type: string
+          example: Widget Adapter
+        releaseDate:
+          type: string
+          format: date-time
+          example: 2016-08-29T09:12:33.001Z
+        manufacturer:
+          $ref: '#/components/schemas/Manufacturer'
+    Manufacturer:
+      required:
+      - name
+      type: object
+      properties:
+        name:
+          type: string
+          example: ACME Corporation
+        homePage:
+          type: string
+          format: url
+          example: https://www.acme-corp.com
+        phone:
+          type: string
+          example: 408-867-5309
+    toyData:
+      type: object
+      properties:
+        customerParam:
+          type: string
+          description: Not sure what this is.  It's provided by Lovense and it is
+            usually `null`.
+        toyType:
+          type: string
+          description: |
+            Comma-delimited list of toys.
+
+            **Example:**
+
+            * One Toy: `lush`
+            * Multiple Toys: `lush,mission`
+          example: lush,mission
+          enum:
+          - ambi
+          - domi
+          - edge
+          - hush
+          - lush
+          - max
+          - mission
+          - nora
+          - osci
+        customerid:
+          type: string
+          description: When a link is generated using the API, this field is present.  It
+            is not used by Lovense.
+        leftTime:
+          type: integer
+          description: Time, in seconds, that was programmed into the link.
+          format: int32
+        allow2way:
+          type: boolean
+          description: Whether two-way is allowed.  Usually set to `false`.
+          default: false
+        customers:
+          type: string
+          description: Not sure what this is.  Usually set to `""`
+          default: '""'
+        sid:
+          type: string
+          description: uuid of the session
+        status:
+          type: string
+          description: Status of the link.
+          enum:
+          - queue
+          - controlling
+          - unauthorized
+        toyId:
+          type: string
+          description: |
+            Comma-delimited list of ToyIDs being controlled.
+
+            **Example:**
+
+            * One Toy: `b123456789`
+            * Multiple Toys: `b123456789,f123456789`
+          example: b123456789,f123456789
+      description: This data is provided by the Lovense endpoint `/loading/:sessionid`.
+    toyCommand:
+      type: object
+      properties:
+        v:
+          maximum: 20
+          minimum: 0
+          type: integer
+          description: Vibration level
+          format: int32
+        p:
+          maximum: 3
+          minimum: -1
+          type: integer
+          description: Compression level.  When the toy is not capable of this action,
+            it is set to -1.
+          format: int32
+        r:
+          maximum: 20
+          minimum: -1
+          type: integer
+          description: Rotation level.  When the toy is not capable of this action,
+            it is set to -1
+          format: int32
+      description: Object of toy settings.
+    LovenseLink:
+      type: object
+      properties:
+        url:
+          type: string
+          description: Contains all of the sanitized versions of the link provided.
+          format: url
+          example: https://c.lovense.com/c/abc123
+        shortURL:
+          type: string
+          description: Contains the characters after the last slash.
+          format: url
+          example: abc123
+        status:
+          type: string
+          description: "The status of the link as of the last heartbeat.  All values\
+            \ are from Lovense \nexcept `matched`.\n- \"matched\": The URL matches\
+            \ the Lovense control link RegExp but has not yet \n  been consumed or\
+            \ parsed\n- \"invalid\": The URL Provided is not valid or has already\
+            \ been consumed\n- \"queue\": The URL is valid and has not been clicked.\
+            \  `toyData` will contain \n  the link information\n- \"controlling\"\
+            : The link is being controlled, either by someone else or by the bot.\n\
+            \  If `toyData` exists, then the bot is controlling.\n- \"unauthorized\"\
+            : The link has expired or session was ended\n"
+          enum:
+          - matched
+          - invalid
+          - queue
+          - controlling
+          - unauthorized
+        toyData:
+          $ref: '#/components/schemas/toyData'
+        heartbeatInternal:
+          type: integer
+          description: ID values that is provided when setInterval is used to send
+            a heartbeat.  Used to `clearInterval` when link has expired.
+          format: int32
+        heartbeatUnixTime:
+          type: integer
+          description: UnixTime of the last time the heartbeat was sent
+          format: int32
+        commandQueue:
+          $ref: '#/components/schemas/LovenseLink_commandQueue'
+    LovenseLink_commandQueue_toyID:
+      type: object
+      properties:
+        current:
+          $ref: '#/components/schemas/toyCommand'
+        queue:
+          $ref: '#/components/schemas/toyCommand'
+      description: "The property/key name for this object is the toyID parsed in toyData.\
+        \  A key \nexists for each toy that is being controlled.\n```\nExample:\n\
+        \  b123456789:\n    - current:\n      - v: 1\n      - p: 1\n      - r: 1\n\
+        \    - queue:\n      - v: 1\n      - p: 1\n      - r: 1\n```\n"
+    LovenseLink_commandQueue:
+      type: object
+      properties:
+        toyID:
+          $ref: '#/components/schemas/LovenseLink_commandQueue_toyID'
+      description: Object of individual toys and commands to send to each toy.
