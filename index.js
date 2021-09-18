@@ -9,7 +9,7 @@ const toyMaxMin = {
     "description": "vibration level",
     "min": 0,
     "max": 20,
-    "toys": ["ambi", "domi", "edge", "hush", "lush", "max", "mission", "nora", "osci"]
+    "toys": ["ambi", "diamo", "domi", "edge", "ferri", "hush", "lush", "max", "mission", "nora", "osci", "quake"]
   },
   "r": {
     "description": "rotation level",
